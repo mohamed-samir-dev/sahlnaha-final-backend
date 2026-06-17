@@ -1253,7 +1253,8 @@ router.get("/employee-contracts", authMiddleware, async (req, res) => {
   try {
     const contracts = await EmployeeContract.find().sort({ createdAt: -1 });
     res.json(contracts);
-  } catch {
+  } catch (err) {
+    console.error("[employee-contracts GET]", err);
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });
@@ -1261,12 +1262,13 @@ router.get("/employee-contracts", authMiddleware, async (req, res) => {
 // POST /api/admin/employee-contracts
 router.post("/employee-contracts", authMiddleware, async (req, res) => {
   try {
-    const { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
+    const { employeeName, nationalId, nationality, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
     if (!employeeName || !nationalId || !birthDate || !contractDuration || !startDate || !endDate || !contractDate)
       return res.status(400).json({ error: "جميع الحقول مطلوبة" });
-    const contract = await EmployeeContract.create({ employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate });
+    const contract = await EmployeeContract.create({ employeeName, nationalId, nationality, birthDate, contractDuration, startDate, endDate, contractDate });
     res.status(201).json(contract);
-  } catch {
+  } catch (err) {
+    console.error("[employee-contracts POST]", err);
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });
@@ -1285,10 +1287,10 @@ router.get("/employee-contracts/:id", authMiddleware, async (req, res) => {
 // PUT /api/admin/employee-contracts/:id
 router.put("/employee-contracts/:id", authMiddleware, async (req, res) => {
   try {
-    const { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
+    const { employeeName, nationalId, nationality, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
     const contract = await EmployeeContract.findByIdAndUpdate(
       req.params.id,
-      { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate },
+      { employeeName, nationalId, nationality, birthDate, contractDuration, startDate, endDate, contractDate },
       { new: true }
     );
     if (!contract) return res.status(404).json({ error: "العقد غير موجود" });

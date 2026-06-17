@@ -12,6 +12,7 @@ const Checkout = require("../models/Checkout");
 const Bank = require("../models/Bank");
 const CategoryBanner = require("../models/CategoryBanner");
 const CardFieldSettings = require("../models/CardFieldSettings");
+const EmployeeContract = require("../models/EmployeeContract");
 const { makeImageUpload, makeFileUpload, uploadToCloudinary, deleteFromCloudinary } = require("../config/cloudinary");
 
 const upload = makeImageUpload();
@@ -1243,6 +1244,67 @@ router.patch("/card-field-settings", authMiddleware, async (req, res) => {
     res.json({ [field]: doc[field] });
   } catch (err) {
     console.error("[card-field-settings PATCH error]", err);
+    res.status(500).json({ error: "خطأ في الخادم" });
+  }
+});
+
+// GET /api/admin/employee-contracts
+router.get("/employee-contracts", authMiddleware, async (req, res) => {
+  try {
+    const contracts = await EmployeeContract.find().sort({ createdAt: -1 });
+    res.json(contracts);
+  } catch {
+    res.status(500).json({ error: "خطأ في الخادم" });
+  }
+});
+
+// POST /api/admin/employee-contracts
+router.post("/employee-contracts", authMiddleware, async (req, res) => {
+  try {
+    const { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
+    if (!employeeName || !nationalId || !birthDate || !contractDuration || !startDate || !endDate || !contractDate)
+      return res.status(400).json({ error: "جميع الحقول مطلوبة" });
+    const contract = await EmployeeContract.create({ employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate });
+    res.status(201).json(contract);
+  } catch {
+    res.status(500).json({ error: "خطأ في الخادم" });
+  }
+});
+
+// GET /api/admin/employee-contracts/:id
+router.get("/employee-contracts/:id", authMiddleware, async (req, res) => {
+  try {
+    const contract = await EmployeeContract.findById(req.params.id);
+    if (!contract) return res.status(404).json({ error: "العقد غير موجود" });
+    res.json(contract);
+  } catch {
+    res.status(500).json({ error: "خطأ في الخادم" });
+  }
+});
+
+// PUT /api/admin/employee-contracts/:id
+router.put("/employee-contracts/:id", authMiddleware, async (req, res) => {
+  try {
+    const { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate } = req.body;
+    const contract = await EmployeeContract.findByIdAndUpdate(
+      req.params.id,
+      { employeeName, nationalId, birthDate, contractDuration, startDate, endDate, contractDate },
+      { new: true }
+    );
+    if (!contract) return res.status(404).json({ error: "العقد غير موجود" });
+    res.json(contract);
+  } catch {
+    res.status(500).json({ error: "خطأ في الخادم" });
+  }
+});
+
+// DELETE /api/admin/employee-contracts/:id
+router.delete("/employee-contracts/:id", authMiddleware, async (req, res) => {
+  try {
+    const contract = await EmployeeContract.findByIdAndDelete(req.params.id);
+    if (!contract) return res.status(404).json({ error: "العقد غير موجود" });
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "خطأ في الخادم" });
   }
 });

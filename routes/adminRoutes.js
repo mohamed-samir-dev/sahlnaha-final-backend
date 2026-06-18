@@ -1262,10 +1262,10 @@ router.get("/employee-contracts", authMiddleware, async (req, res) => {
 // POST /api/admin/employee-contracts
 router.post("/employee-contracts", authMiddleware, async (req, res) => {
   try {
-    const { contractDuration, startDate, endDate } = req.body;
+    const { contractDuration, startDate, endDate, contractDate } = req.body;
     if (!contractDuration || !startDate || !endDate)
       return res.status(400).json({ error: "جميع الحقول مطلوبة" });
-    const contract = await EmployeeContract.create({ contractDuration, startDate, endDate });
+    const contract = await EmployeeContract.create({ contractDuration, startDate, endDate, contractDate: contractDate || "" });
     res.status(201).json(contract);
   } catch (err) {
     console.error("[employee-contracts POST]", err);
